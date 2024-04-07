@@ -21,7 +21,6 @@ import { Refresh as RefreshIcon } from '@material-ui/icons';
                         <TableHead>
                             <TableRow>
                                 <TableCell><b>ID</b></TableCell>
-                                <TableCell><b>GST Number</b></TableCell>
                                 <TableCell><b>PAN Number</b></TableCell>
                                 <TableCell><b>TIN</b></TableCell>
                                 <TableCell><b>Vendor Name</b></TableCell>
@@ -34,7 +33,6 @@ import { Refresh as RefreshIcon } from '@material-ui/icons';
                             {vendors.map((vendor) => (
                                 <TableRow key={vendor.id}>
                                     <TableCell>{vendor.id}</TableCell>
-                                    <TableCell>{vendor.gst_number}</TableCell>
                                     <TableCell>{vendor.pan_number}</TableCell>
                                     <TableCell>{vendor.tin}</TableCell>
                                     <TableCell>{vendor.vendor_name}</TableCell>

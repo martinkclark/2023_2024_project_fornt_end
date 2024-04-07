@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState , useEffect } from 'react';
 import { Container, Grid, TextField, Button, MenuItem ,Snackbar} from '@mui/material';
 import { useAuth } from 'src/hooks/useAuth';
 
@@ -24,12 +24,10 @@ import { useAuth } from 'src/hooks/useAuth';
 
 const VendorRegistrationForm = () => {
 
-    const {vendor_registration_form, handleVendorFormChange,handleVendorFormSubmit,vander_form_errorMessag,handleCloseVendorError} = useAuth();
-
-
+    const {vendor_registration_form, handleVendorFormChange,handleVendorFormSubmit,vendor_form_errorMessage,handleCloseVendorError} = useAuth();
+    
   return (
     <Container maxWidth="sm">
-      <h1>{vander_form_errorMessag}</h1>
       <form onSubmit={(e) => handleVendorFormSubmit(e)}>
       <Grid container spacing={2}>
       <Grid item xs={12}>
@@ -40,15 +38,6 @@ const VendorRegistrationForm = () => {
               value={vendor_registration_form.pan_number}
               onChange={handleVendorFormChange}
         />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="GST Number"
-              name="gst_number"
-              value={vendor_registration_form.gst_number}
-              onChange={handleVendorFormChange}
-            />
           </Grid>
           <Grid item xs={12}>
             <TextField
@@ -108,10 +97,10 @@ const VendorRegistrationForm = () => {
               Submit 
             </Button>
             <Snackbar
-            open={!!vander_form_errorMessag}
-            autoHideDuration={1000}
+            open={!!vendor_form_errorMessage}
+            autoHideDuration={2000}
             onClose={handleCloseVendorError}
-            message={vander_form_errorMessag}
+            message={vendor_form_errorMessage}
             />
           </Grid>
         </Grid>

@@ -9,6 +9,7 @@ import axios from 'axios'
 
 // ** Config
 import authConfig from 'src/configs/auth'
+import { gridColumnGroupsLookupSelector } from '@mui/x-data-grid'
 
 // ** Defaults
 const defaultProvider = {
@@ -37,7 +38,6 @@ const defaultProvider = {
 
   //Martin initialise vendaors registration form
   vendor_registration_form: {
-    gst_number: '',
     pan_number: '',
     tin: '',
     vendor_name: '',
@@ -49,9 +49,34 @@ const defaultProvider = {
   handleVendorFormChange: () => null,
   handleVendorFormSubmit: () => null,
   
-  vander_form_errorMessage: null,
-  vander_form_setErrorMessage: () => null,
-  handleCloseVendorError: () => null
+  vendor_form_errorMessage: null,
+  setvendor_form_ErrorMessage: () => null,
+  handleCloseVendorError: () => null,
+
+  //Martin initialise vendaors transaction form
+  vendor_transaction_form: {
+    vendor_id: '',
+    financial_year: '',
+    date_of_payment: '',
+    invoice_number: '',
+    gross_amount: '',
+    it_taxable_amount: '',
+    section_code: '', 
+},
+  setvendor_transaction_form: () => null,
+  handleVendorTransactionFormChange: () => null,
+  handleVendorTransactionFormSubmit: () => null,
+  vendor_transaction_form_errorMessage: null,
+  setvendor_transaction_form_ErrorMessage: () => null,
+
+  Transaction_setIsModalOpen : false,
+  Transaction_isModalOpen : false,
+  Transaction_handleOpenModal : () => null,
+  Transaction_handleCloseModal : () => null,
+
+  vendor_transaction_data: [],
+  setvendor_transaction_data: () => null,
+  handle_vendor_transaction: () => null,
 
 }
 const url = process.env.APIURL; 
@@ -71,14 +96,25 @@ const AuthProvider = ({ children }) => {
   //Martin set Vendor registration form states
   const [vendor_registration_form, setvendor_registration_form] = useState(defaultProvider.vendor_registration_form);
 
-  const [vander_form_errorMessage, vander_form_setErrorMessage] = useState(null);
+  const [vendor_form_errorMessage, setvendor_form_ErrorMessage] = useState(null);
 
+  //Martin set Vendor transaction form states
+  const [vendor_transaction_form, setvendor_transaction_form] = useState(defaultProvider.vendor_transaction_form);
+
+  const [vendor_transaction_form_errorMessage, setvendor_transaction_form_ErrorMessage] = useState(null);
+
+  const [Transaction_isModalOpen, Transaction_setIsModalOpen] = useState(false);
+
+  //Martin set Vendor transaction data states
+
+  const [vendor_transaction_data, setvendor_transaction_data] = useState([]);
 
   // ** Hooks
   const router = useRouter()
   useEffect(() => {
     //Martin calling them in start
       handleVendorsdata();
+      handle_vendor_transaction();
     
     //
     const initAuth = async () => {
@@ -275,6 +311,22 @@ const AuthProvider = ({ children }) => {
           return [];
       }
     };
+
+    //Martin vendors transaction data showing function
+
+    const handle_vendor_transaction = async () => {
+      try {
+          const response = await axios
+          .get(url+'vendor-transactions');
+          setvendor_transaction_data(response.data);
+      } catch (error) {
+
+          console.error('Error fetching vendors:', error);
+          return [];
+      }
+    };
+
+
     
     //Martin vendors registration form
     const handleVendorFormSubmit = async (e) => {
@@ -282,34 +334,106 @@ const AuthProvider = ({ children }) => {
       try {
       const response = await axios.post(url+'vendors', vendor_registration_form);
       console.log("Form submitted : ", response.data);
+      setvendor_registration_form({
+        pan_number: '',
+        tin: '',
+        vendor_name: '',
+        owner_name: '',
+        vendor_type: '',
+        address: ''
+      });
+      setvendor_form_ErrorMessage("Submitted");
       return response.data;
       } catch (error) {
-          //   if (error.response && error.response.data && error.response.data.errors.pan_number[0]) {
-          //     // If custom error message exists, set it in state
-          //     vander_form_setErrorMessage(error.response.data.errors.pan_number[0]);
-          // } else {
-          //     // If no custom error message, set a generic error message
-          //     vander_form_setErrorMessage('An error occurred while submitting the form.');
-          //  }
-          //  console.log("Vendor form error : ",error.response.data.errors.pan_number[0]);
-
-          console.log("Vendor form error : ",error);
-
+        setvendor_form_ErrorMessage(error.response.data.errors.pan_number[0]);
+        console.log("Error : ",error.response.data.errors.pan_number[0] , "type : ",typeof(error.response.data.errors.pan_number[0]));
+          
+          console.log("Vendor form error : ",vendor_form_errorMessage);
+          setvendor_registration_form({
+            pan_number: '',
+            tin: '',
+            vendor_name: '',
+            owner_name: '',
+            vendor_type: '',
+            address: '' 
+          });
       }
+      
     }
 
     const handleVendorFormChange =  (e) => {
       console.log("Form data changed : ",e.target.name, e.target.value);
       setvendor_registration_form({...vendor_registration_form, [e.target.name]: e.target.value});
     }
-
-    const handleCloseVendorError = () => {
-      vander_form_setErrorMessage(null);
+    
+    
+    
+    //Martin vendors transaction form
+    
+    const handleVendorTransactionFormSubmit = async (e) => {
+      Transaction_handleCloseModal();
+      e.preventDefault();
+      try {
+        const response = await axios.post(url+'vendor-transactions', vendor_transaction_form);
+        console.log("Form submitted : ", response.data);
+        setvendor_transaction_form_ErrorMessage("Submitted");
+        setvendor_transaction_form({
+          vendor_id: '',
+          financial_year: '',
+          date_of_payment: '',
+          invoice_number: '',
+          gross_amount: '',
+          it_taxable_amount: '',
+          section_code: '', 
+      });
+      setvendor_form_ErrorMessage("Submitted");
+      return response.data;
+    } catch (error) {
+      setvendor_transaction_form_ErrorMessage("Error in form submission");
+      console.log("error : ",error);
+      setvendor_transaction_form({
+        vendor_id: '',
+        financial_year: '',
+        date_of_payment: '',
+        invoice_number: '',
+        gross_amount: '',
+        it_taxable_amount: '',
+        section_code: '', 
+      });
     }
+    
+  }
   
+    const handleVendorTransactionFormChange =  (e) => {
+      console.log("Transaction Form data changed : ",e.target.name, e.target.value);
+      setvendor_transaction_form({...vendor_transaction_form, [e.target.name]: e.target.value});
+      
+    }
+    
+    const handleCloseVendorError = () => {
+      setvendor_form_ErrorMessage(null);
+      setvendor_transaction_form_ErrorMessage(null);
+    }
+    
+    //Martin modal of transaction form
+   
 
-
-  const values = {
+    const Transaction_handleOpenModal = () => {
+      Transaction_setIsModalOpen(true);
+    };
+  
+    const Transaction_handleCloseModal = () => {
+      Transaction_setIsModalOpen(false);
+    };
+  
+    const Transaction_handleSubmit = (e) => {
+      e.preventDefault();
+      console.log("Transaction_handleCloseModal");
+      Transaction_handleOpenModal();
+    };
+    
+    
+    const values = {
     user,
     loading,
     setUser,
@@ -337,10 +461,28 @@ const AuthProvider = ({ children }) => {
     setvendor_registration_form,
     handleVendorFormChange,
     handleVendorFormSubmit,
-    vander_form_errorMessage,
-    vander_form_setErrorMessage,
-    handleCloseVendorError
+    vendor_form_errorMessage,
+    setvendor_form_ErrorMessage,
+    handleCloseVendorError,
 
+    //Martin, Providing context for vendors transaction form
+    vendor_transaction_form,
+    setvendor_transaction_form,
+    handleVendorTransactionFormChange,
+    handleVendorTransactionFormSubmit,
+    vendor_transaction_form_errorMessage,
+    setvendor_transaction_form_ErrorMessage,
+
+    //Martin, Providing context for vendors transaction modal
+    Transaction_isModalOpen,
+    Transaction_handleOpenModal,
+    Transaction_handleCloseModal,
+    Transaction_handleSubmit,
+
+    //Martin, Providing context for vendors transaction data
+    vendor_transaction_data,
+    setvendor_transaction_data,
+    handle_vendor_transaction
 
 
   }
